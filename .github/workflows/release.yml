@@ -1,0 +1,106 @@
+name: Version, Release & Publish Docker
+
+on:
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}   # ghcr.io/<owner>/<repo>
+  DOCKER_BUILDKIT: "1"
+  # Default to dry-run in local 'act' runs; set repo variable DRY_RUN=false to actually publish when testing locally.
+  DRY_RUN: ${{ vars.DRY_RUN || 'true' }}
+
+jobs:
+  build-release-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # semantic-release needs full history
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install semantic-release and plugins
+        run: |
+          npm i -D semantic-release @semantic-release/changelog \
+                 @semantic-release/commit-analyzer @semantic-release/release-notes-generator \
+                 @semantic-release/git @semantic-release/github
+
+      - name: Choose release config by branch
+        id: cfg
+        run: |
+          BR="${GITHUB_REF##*/}"
+          if [ "$BR" = "main" ]; then
+            echo "file=.releaserc.main.json" >> $GITHUB_OUTPUT
+          else
+            echo "file=.releaserc.develop.json" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run semantic-release
+        id: semrel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release --config ${{ steps.cfg.outputs.file }} $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
+
+      - name: Get current tag (last release)
+        id: tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get most recent tag reachable from HEAD
+          TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          # Fall back to GitHub Release if tag is missing
+          if [ -z "$TAG" ]; then
+            TAG="$(gh release view --json tagName -q .tagName || true)"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Docker login to GHCR
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image with labels
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          [ -z "$VERSION" ] && { echo "Version could not be determined"; exit 1; }
+
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            --label org.opencontainers.image.version=v$VERSION \
+            -t ${{ env.IMAGE_NAME }}:v$VERSION \
+            .
+
+      - name: Tag Docker channel aliases
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          BR="${GITHUB_REF##*/}"
+          if [ "$BR" = "main" ]; then
+            docker tag ${{ env.IMAGE_NAME }}:v$VERSION ${{ env.IMAGE_NAME }}:latest
+          else
+            docker tag ${{ env.IMAGE_NAME }}:v$VERSION ${{ env.IMAGE_NAME }}:develop
+          fi
+
+      - name: Push Docker images
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          BR="${GITHUB_REF##*/}"
+          docker push ${{ env.IMAGE_NAME }}:v$VERSION
+          if [ "$BR" = "main" ]; then
+            docker push ${{ env.IMAGE_NAME }}:latest
+          else
+            docker push ${{ env.IMAGE_NAME }}:develop
+          fi
