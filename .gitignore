@@ -92,3 +92,6 @@ pids
 # Temporary files
 *.tmp
 *.temp
+
+# Nodejs
+node_modules/
