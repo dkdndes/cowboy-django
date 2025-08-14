@@ -1,0 +1,104 @@
+name: Local CI Test (act) – Version & Docker (Dry Run)
+
+on:
+  # Auto-run on feature branches (safe: dry-run only)
+  push:
+    branches: ['feature/**']
+  # Manual trigger from the Actions tab (also usable with `act workflow_dispatch`)
+  workflow_dispatch:
+
+permissions:
+  contents: write       # semantic-release (even in dry-run) reads repo data
+  packages: write       # present, but we never push in this test workflow
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  DOCKER_BUILDKIT: "1"
+  DRY_RUN: "true"       # hard-enforced for this test workflow
+
+jobs:
+  build-release-dry-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # semantic-release needs full history to compute next version
+
+      - name: Setup Node (for semantic-release)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Prevent using a stale/corrupted host node_modules copied by act
+      - name: Clean Node env
+        run: |
+          rm -rf node_modules package-lock.json
+
+      # Pin compatible versions to avoid ESM/import issues under act
+      - name: Install semantic-release toolchain (pinned)
+        run: |
+          npm install -D \
+            semantic-release@23 \
+            @semantic-release/commit-analyzer@11 \
+            @semantic-release/release-notes-generator@12 \
+            @semantic-release/changelog@6 \
+            @semantic-release/git@10 \
+            @semantic-release/github@9
+
+      # Dry-run using your develop config (no GitHub Release behavior)
+      - name: Run semantic-release (dry-run, using develop config)
+        id: semrel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release --config .releaserc.develop.json --dry-run
+      
+      - name: Show semantic-release next version (dry-run parse)
+        if: always()
+        run: |
+          echo "Note: on feature/* branches we dry-run only."
+          echo "semantic-release decides the next version based on Conventional Commits."
+          # For visibility, show the most recent tag and branch
+          echo "Current branch: ${GITHUB_REF##*/}"
+          echo "Most recent tag: $(git describe --tags --abbrev=0 2>/dev/null || echo 'none')"
+
+      # Best-effort version detection for tagging the local Docker build
+      - name: Determine version/tag (best effort)
+        id: tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Prefer the most recent Git tag
+          TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          # Fallback to the last GitHub release tag if it exists
+          if [ -z "$TAG" ]; then
+            TAG="$(gh release view --json tagName -q .tagName || true)"
+          fi
+          # Fallback if none exist yet
+          [ -z "$TAG" ] && TAG="v0.0.0"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+          echo "Using version: ${TAG#v}"
+
+      # Build Docker image locally with OCI labels; never pushes in this workflow
+      - name: Build Docker image (no push)
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            --label org.opencontainers.image.version=v$VERSION \
+            -t ${{ env.IMAGE_NAME }}:v$VERSION \
+            .
+
+      # Also tag a channel alias to mimic your develop flow
+      - name: Tag channel alias (develop)
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          docker tag ${{ env.IMAGE_NAME }}:v$VERSION ${{ env.IMAGE_NAME }}:develop
+
+      # Quick sanity output
+      - name: Show built images
+        run: docker images | head -n 30
