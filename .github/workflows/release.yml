@@ -31,12 +31,12 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install semantic-release and plugins
+      - name: Install semantic-release and plugins (no npm plugin)
         run: |
           npm i -D semantic-release @semantic-release/changelog \
                  @semantic-release/commit-analyzer @semantic-release/release-notes-generator \
                  @semantic-release/git @semantic-release/github
-      
+
       - name: Choose release config by branch
         id: cfg
         run: |
@@ -47,12 +47,26 @@ jobs:
             echo "file=.releaserc.develop.json" >> $GITHUB_OUTPUT
           fi
 
+      - name: Show & validate selected config
+        run: |
+          echo "PWD=$(pwd)"
+          echo "Using config: ${{ steps.cfg.outputs.file }}"
+          test -f "${{ steps.cfg.outputs.file }}" || { echo "Config not found"; exit 1; }
+          command -v jq >/dev/null || sudo apt-get update && sudo apt-get install -y jq
+          jq . "${{ steps.cfg.outputs.file }}" >/dev/null || { echo "Config JSON invalid"; exit 1; }
+          echo "----- BEGIN CONFIG -----"
+          cat "${{ steps.cfg.outputs.file }}"
+          echo "------ END CONFIG ------"
+
       - name: Run semantic-release
         id: semrel
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx semantic-release --config ${{ steps.cfg.outputs.file }} $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
+          npx semantic-release \
+            --config "${{ steps.cfg.outputs.file }}" \
+            --repository-url "https://github.com/${{ github.repository }}" \
+            $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
 
       - name: Get current tag (last release)
         id: tag
