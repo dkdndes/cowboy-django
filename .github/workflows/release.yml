@@ -13,6 +13,8 @@ env:
   DOCKER_BUILDKIT: "1"
   # Default to dry-run in local 'act' runs; set repo variable DRY_RUN=false to actually publish when testing locally.
   DRY_RUN: ${{ vars.DRY_RUN || 'true' }}
+  # Hard-block npm auth so @semantic-release/npm can't accidentally kick in
+  NPM_CONFIG_USERCONFIG: /dev/null
 
 jobs:
   build-release-publish:
@@ -34,7 +36,7 @@ jobs:
           npm i -D semantic-release @semantic-release/changelog \
                  @semantic-release/commit-analyzer @semantic-release/release-notes-generator \
                  @semantic-release/git @semantic-release/github
-
+      
       - name: Choose release config by branch
         id: cfg
         run: |
