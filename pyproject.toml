@@ -36,7 +36,8 @@ prerelease = false
 
 [tool.semantic_release.branches.develop]
 match = "develop"
-prerelease = false
+prerelease = true
+prerelease_token = "a"
 
 [tool.semantic_release.changelog]
 template_dir = "templates"
