@@ -2,7 +2,9 @@
 
 A Django + HTMX web app that serves ASCII art cowboys with Kubernetes-themed jokes. Perfect for DevOps engineers who need a laugh between deployments!
 
-**Repository**: [cowboy-django](github.com/dkdndes/cowboy-django)
+**Repository**: [cowboy-django](https://github.com/dkdndes/cowboy-django)  
+**Docker Images**: [ghcr.io/dkdndes/cowboy-django](https://github.com/users/dkdndes/packages/container/package/cowboy-django)  
+**Latest Release**: ![GitHub release](https://img.shields.io/github/v/release/dkdndes/cowboy-django)
 
 # What It Is
 
@@ -19,29 +21,47 @@ Cowboy Django is a fun web application that displays ASCII art cowboys deliverin
 
 # Quick Start
 
-## Option 1: Docker (Standalone)
+## Option 1: Docker (Pre-built Images)
 
-### Clone the repository
-```
-git clone git@github.com:dkdndes/cowboy-django.git
-cd cowboy-django
+### Run latest stable release
+```bash
+docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:latest
 ```
 
-### Build and run locally
-
+### Run development version
+```bash
+docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:develop
 ```
-docker build -t dkdndes/cowboy-django .
-docker run -p 8000:8000 dkdndes/cowboy-django
+
+### Run specific version
+```bash
+docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:v2.0.1
 ```
 
 Visit: http://localhost:8000
 
-## Option 2: Local Development with uv
+## Option 2: Docker (Build Locally)
+
+### Clone the repository
+```bash
+git clone https://github.com/dkdndes/cowboy-django.git
+cd cowboy-django
+```
+
+### Build and run locally
+```bash
+docker build -t cowboy-django .
+docker run -p 8000:8000 cowboy-django
+```
+
+Visit: http://localhost:8000
+
+## Option 3: Local Development with uv
 
 ### Clone and setup
 
-```
-git clone git@github.com:dkdndes/cowboy-django.git
+```bash
+git clone https://github.com/dkdndes/cowboy-django.git
 cd cowboy-django
 ```
 ### Install dependencies
@@ -60,6 +80,25 @@ uv run python manage.py runserver
 ```
 Visit: http://localhost:8000
 
+# Automated Releases & Docker Images
+
+This project uses automated workflows for releases and Docker image publishing:
+
+## 🔄 Release Workflow
+- **Develop branch** → Creates pre-releases (e.g., `v2.0.1-a.1`) for testing
+- **Main branch** → Creates stable releases (e.g., `v2.0.1`) for production
+- **Conventional commits** drive version bumps automatically
+
+## 🐳 Docker Images
+- **Latest stable**: `ghcr.io/dkdndes/cowboy-django:latest`
+- **Development**: `ghcr.io/dkdndes/cowboy-django:develop`  
+- **Specific versions**: `ghcr.io/dkdndes/cowboy-django:v2.0.1`
+- **Pre-releases**: `ghcr.io/dkdndes/cowboy-django:v2.0.1-a.1`
+
+## 📚 Workflow Documentation
+For using these workflows in your own Django projects:
+- [Python Semantic Release Workflow](docs/python-semantic-release-workflow.md)
+- [Docker Build & Publish Workflow](docs/docker-build-publish-workflow.md)
 
 # Kubernetes Deployment
 
@@ -72,9 +111,18 @@ Prerequisites
 
 ## Step-by-Step Deployment
 
-### 1. Build and Load Image (for KIND)
+### 1. Load Pre-built Image (for KIND)
 
+```bash
+# Pull latest stable release
+docker pull ghcr.io/dkdndes/cowboy-django:latest
+
+# Load into KIND cluster
+kind load docker-image ghcr.io/dkdndes/cowboy-django:latest --name your-cluster-name
 ```
+
+Or build locally:
+```bash
 docker build -t dkdndes/cowboy-django:latest .
 kind load docker-image dkdndes/cowboy-django:latest --name your-cluster-name
 ```
