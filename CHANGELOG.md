@@ -1,6 +1,64 @@
 # CHANGELOG
 
 
+## v2.0.0 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Pin semantic-release plugin versions to resolve parser errors
+  ([`fdbc047`](https://github.com/dkdndes/cowboy-django/commit/fdbc047361b5c48155980784dfd1d5fa9f319a93))
+
+Use known working versions instead of latest to fix the load-parser-config error: -
+  semantic-release@22.0.12 - commit-analyzer@11.1.0 - Other plugins pinned to compatible versions
+
+This should resolve the parser function compatibility issue.
+
+- **ci**: Remove problematic parserOpts from semantic-release config
+  ([`177d4da`](https://github.com/dkdndes/cowboy-django/commit/177d4da7e748f7990c1c0903ecdf3232ce0d176d))
+
+The parserOpts configuration was causing a parsing error in semantic-release. Use default parser
+  options which handle BREAKING CHANGE correctly.
+
+- **ci**: Repair semantic-release configuration for any repository (#20)
+  ([#21](https://github.com/dkdndes/cowboy-django/pull/21),
+  [`08a9d49`](https://github.com/dkdndes/cowboy-django/commit/08a9d498fa34f3d1933b20a952cd7dd71643d076))
+
+- Add missing tagFormat to both release configs for consistent v1.2.3 tags - Use GitHub environment
+  variables instead of hardcoded repository URLs - Fix semantic-release config path resolution with
+  proper ./ prefix - Standardize release rules across develop and main configurations - Add
+  comprehensive CLAUDE.md documentation for future development
+
+This makes the release workflow portable to any Django project.
+
+- **ci**: Use default conventionalcommits rules to avoid parser errors
+  ([`cbcd3f5`](https://github.com/dkdndes/cowboy-django/commit/cbcd3f55e02c47326585ebf1212ed7545b22cfe6))
+
+Remove custom releaseRules that were causing semantic-release parser failures. Use default
+  conventionalcommits behavior which should handle feat/fix correctly.
+
+- **ignore**: Resolve .gitignore conflict and exclude CLAUDE.md from tracking
+  ([`4332da8`](https://github.com/dkdndes/cowboy-django/commit/4332da86cd24d5a348ca598832df237b13b063f5))
+
+- Resolve merge conflict in .gitignore - Add CLAUDE.md to .gitignore to keep it local only - Add
+  explicit CLAUDE.md entry to .dockerignore for clarity - Remove conflicting nodejs entries leftover
+  from migration
+
+### Features
+
+- **release**: Enable real releases and simplify semantic-release config
+  ([`bbeb55e`](https://github.com/dkdndes/cowboy-django/commit/bbeb55ebdc8ecc873c8f054f0f4b225073dd58eb))
+
+- Disable DRY_RUN mode by setting repository variable to false - Use default presets for
+  commit-analyzer to avoid parser errors - This should trigger semantic-release to create v1.1.0
+  based on feat commits
+
+BREAKING CHANGE: This enables real releases instead of dry-run mode
+
+### Breaking Changes
+
+- **release**: This enables real releases instead of dry-run mode
+
+
 ## v1.2.1 (2025-08-16)
 
 ### Bug Fixes
