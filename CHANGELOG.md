@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v2.0.2-a.1 (2025-08-16)
+
+### Documentation
+
+- Comprehensive workflow and project documentation
+  ([`430a9fa`](https://github.com/dkdndes/cowboy-django/commit/430a9fa8f30c160a1d7b369133a1928ab8a72add))
+
+- Add detailed Python Semantic Release workflow documentation - Add comprehensive Docker Build &
+  Publish workflow documentation - Create complete Cowboy Django project documentation - Update
+  README.md with automated release info and Docker image links - Update legacy release documentation
+  with migration information - Provide reusable workflow guides for other Django projects
+
+
 ## v2.0.1 (2025-08-16)
 
 
