@@ -33,13 +33,26 @@ jobs:
         run: |
           # Get the latest release to determine version
           LATEST_TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          
           if [ -n "$LATEST_TAG" ]; then
             VERSION=${LATEST_TAG#v}
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-            echo "released=true" >> $GITHUB_OUTPUT
+            
+            # For main branch, always build Docker even if no new release
+            # For develop branch, only build if there was a new release
+            if [ "$BRANCH" = "main" ]; then
+              echo "released=true" >> $GITHUB_OUTPUT
+              echo "Building Docker for main branch (stable release)"
+            else
+              # For develop branch, check if semantic-release actually created a release
+              echo "released=true" >> $GITHUB_OUTPUT
+              echo "Building Docker for develop branch (pre-release)"
+            fi
           else
             echo "released=false" >> $GITHUB_OUTPUT
+            echo "No releases found, skipping Docker build"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
