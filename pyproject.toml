@@ -19,7 +19,7 @@ dev = [
 ]
 
 [tool.semantic_release]
-version_variables = [
+version_toml = [
     "pyproject.toml:project.version",
 ]
 build_command = """

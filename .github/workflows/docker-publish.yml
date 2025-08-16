@@ -6,6 +6,16 @@ on:
     types:
       - completed
     branches: [develop, main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build Docker image for'
+        required: true
+        default: 'main'
+        type: choice
+        options:
+          - main
+          - develop
 
 permissions:
   contents: write
@@ -20,25 +30,43 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.event.workflow_run.head_branch }}
 
       - name: Get release info from semantic-release workflow
         id: get_release_info
         run: |
+          # Debug workflow trigger information
+          echo "=== Workflow Debug Info ==="
+          echo "Triggered by workflow: ${{ github.event.workflow_run.name }}"
+          echo "Workflow conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "Head branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "Head SHA: ${{ github.event.workflow_run.head_sha }}"
+          echo "=========================="
+          
           # Get the latest release to determine version
           LATEST_TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          
+          # Determine branch based on trigger type
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            BRANCH="${{ github.event.inputs.branch }}"
+            echo "Manual dispatch for branch: $BRANCH"
+          else
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            echo "Triggered by workflow_run for branch: $BRANCH"
+          fi
           
           if [ -n "$LATEST_TAG" ]; then
             VERSION=${LATEST_TAG#v}
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            
+            echo "Found release: $LATEST_TAG for branch: $BRANCH"
             
             # For main branch, always build Docker even if no new release
             # For develop branch, only build if there was a new release
@@ -46,7 +74,7 @@ jobs:
               echo "released=true" >> $GITHUB_OUTPUT
               echo "Building Docker for main branch (stable release)"
             else
-              # For develop branch, check if semantic-release actually created a release
+              # For develop branch, always build since we have a release
               echo "released=true" >> $GITHUB_OUTPUT
               echo "Building Docker for develop branch (pre-release)"
             fi
