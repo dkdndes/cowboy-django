@@ -1,0 +1,130 @@
+name: Docker Build & Publish
+
+on:
+  workflow_run:
+    workflows: ["Python Semantic Release"]
+    types:
+      - completed
+    branches: [develop, main]
+
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Get release info from semantic-release workflow
+        id: get_release_info
+        run: |
+          # Get the latest release to determine version
+          LATEST_TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
+          if [ -n "$LATEST_TAG" ]; then
+            VERSION=${LATEST_TAG#v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "released=true" >> $GITHUB_OUTPUT
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Container Registry
+        if: steps.get_release_info.outputs.released == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image with labels
+        if: steps.get_release_info.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release_info.outputs.version }}"
+          TAG="${{ steps.get_release_info.outputs.tag }}"
+          
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.event.workflow_run.head_sha }} \
+            --label org.opencontainers.image.version=$TAG \
+            --label org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            --label org.opencontainers.image.title="Cowboy Django" \
+            --label org.opencontainers.image.description="Django + HTMX web app with ASCII art cowboys and Kubernetes jokes" \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION \
+            .
+
+      - name: Tag Docker channel aliases
+        if: steps.get_release_info.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release_info.outputs.version }}"
+          TAG="${{ steps.get_release_info.outputs.tag }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          
+          if [ "$BRANCH" = "main" ]; then
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            echo "Tagged as latest for main branch"
+          elif [ "$BRANCH" = "develop" ]; then
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
+            echo "Tagged as develop for develop branch"
+          fi
+
+      - name: Push Docker images
+        if: steps.get_release_info.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release_info.outputs.version }}"
+          TAG="${{ steps.get_release_info.outputs.tag }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          
+          # Push version tag
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION
+          
+          # Push branch alias
+          if [ "$BRANCH" = "main" ]; then
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            echo "Pushed latest tag"
+          elif [ "$BRANCH" = "develop" ]; then
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
+            echo "Pushed develop tag"
+          fi
+
+      - name: Summary
+        if: steps.get_release_info.outputs.released == 'true'
+        run: |
+          echo "## Docker Build & Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.get_release_info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: ${{ steps.get_release_info.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Images pushed**:" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if [ "$BRANCH" = "main" ]; then
+            echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          elif [ "$BRANCH" = "develop" ]; then
+            echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: No release summary
+        if: steps.get_release_info.outputs.released != 'true'
+        run: |
+          echo "## Docker Build & Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ℹ️ No new release detected, skipping Docker build" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY

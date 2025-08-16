@@ -91,9 +91,7 @@ pids
 
 # Temporary files
 *.tmp
-<<<<<<< HEAD
 *.temp
 
-# Nodejs
-node_modules/
-*.tempnode_modules/
+# Claude documentation (local only)
+CLAUDE.md
