@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v2.0.3 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Resolve version updates and Docker workflow triggers
+  ([`105a029`](https://github.com/dkdndes/cowboy-django/commit/105a029d5e32079e2814ee579f7a83a39cb0583c))
+
+- Fix semantic-release configuration: use version_toml instead of version_variables for
+  pyproject.toml - Improve Docker workflow trigger reliability with workflow_dispatch fallback - Add
+  comprehensive debugging for workflow_run triggers - Support both automatic and manual Docker
+  builds
+
+
 ## v2.0.2 (2025-08-16)
 
 
