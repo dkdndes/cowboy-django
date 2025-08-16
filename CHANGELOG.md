@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v1.1.1 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Add id-token permission and debug Docker login
+  ([`c7472e2`](https://github.com/dkdndes/cowboy-django/commit/c7472e20b0cd7947308574b205cd72b23779e4de))
+
+- Add id-token: write permission for better GHCR authentication - Add debugging output to Docker
+  login step - This should resolve the 'permission_denied: write_package' error
+
+
 ## v1.1.0 (2025-08-16)
 
 ### Bug Fixes
