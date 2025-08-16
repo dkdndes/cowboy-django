@@ -1,0 +1,109 @@
+name: Python Semantic Release & Docker Publish
+
+on:
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    concurrency: release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --dev
+          uv pip install python-semantic-release
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "semantic-release"
+          git config --global user.email "semantic-release@users.noreply.github.com"
+
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.21.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "semantic-release"
+          git_committer_email: "semantic-release@users.noreply.github.com"
+
+      - name: Get release info
+        id: get_release
+        run: |
+          echo "version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")" >> $GITHUB_OUTPUT
+          echo "released=${{ steps.release.outputs.released }}" >> $GITHUB_OUTPUT
+
+      - name: Docker login to GHCR
+        if: steps.get_release.outputs.released == 'true'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image with labels
+        if: steps.get_release.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release.outputs.version }}"
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            --label org.opencontainers.image.version=v$VERSION \
+            -t ${{ env.IMAGE_NAME }}:v$VERSION \
+            .
+
+      - name: Tag Docker channel aliases
+        if: steps.get_release.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release.outputs.version }}"
+          BR="${GITHUB_REF##*/}"
+          if [ "$BR" = "main" ]; then
+            docker tag ${{ env.IMAGE_NAME }}:v$VERSION ${{ env.IMAGE_NAME }}:latest
+          else
+            docker tag ${{ env.IMAGE_NAME }}:v$VERSION ${{ env.IMAGE_NAME }}:develop
+          fi
+
+      - name: Push Docker images
+        if: steps.get_release.outputs.released == 'true'
+        run: |
+          VERSION="${{ steps.get_release.outputs.version }}"
+          BR="${GITHUB_REF##*/}"
+          docker push ${{ env.IMAGE_NAME }}:v$VERSION
+          if [ "$BR" = "main" ]; then
+            docker push ${{ env.IMAGE_NAME }}:latest
+          else
+            docker push ${{ env.IMAGE_NAME }}:develop
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Released**: ${{ steps.get_release.outputs.released }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.get_release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${GITHUB_REF##*/}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.get_release.outputs.released }}" = "true" ]; then
+            echo "- **Docker Images**: \`${{ env.IMAGE_NAME }}:v${{ steps.get_release.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
