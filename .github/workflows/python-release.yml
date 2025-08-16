@@ -8,6 +8,7 @@ permissions:
   contents: write
   packages: write
   pull-requests: write
+  id-token: write
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
@@ -62,7 +63,9 @@ jobs:
       - name: Docker login to GHCR
         if: steps.get_release.outputs.released == 'true'
         run: |
+          echo "Logging in as: ${{ github.actor }}"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "Login successful"
 
       - name: Build Docker image with labels
         if: steps.get_release.outputs.released == 'true'
