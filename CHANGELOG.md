@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v1.2.0 (2025-08-16)
+
+### Features
+
+- **ci**: Separate semantic-release and Docker workflows
+  ([`1de720f`](https://github.com/dkdndes/cowboy-django/commit/1de720f330c92e07a7389f44f4daa7f4cef8d679))
+
+- Split python-release.yml into semantic-release only workflow - Create docker-publish.yml workflow
+  triggered by semantic-release completion - Use workflow_run trigger to pass version information
+  between workflows - Add comprehensive labels and metadata to Docker images - Support both main and
+  develop branch workflows
+
+This separation allows: - Independent debugging of semantic-release vs Docker issues - Better
+  control over Docker publishing permissions - Cleaner workflow outputs and summaries
+
+
 ## v1.1.2 (2025-08-16)
 
 ### Bug Fixes
