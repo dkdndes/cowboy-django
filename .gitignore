@@ -95,3 +95,6 @@ pids
 
 # Claude documentation (local only)
 CLAUDE.md
+
+# Auto-generated version file
+cowboysite/_version.py

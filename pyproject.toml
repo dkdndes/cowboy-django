@@ -1,6 +1,6 @@
 [project]
 name = "cowboy-django"
-version = "2.0.3"
+dynamic = ["version"]
 description = "A Django + HTMX web app that serves ASCII art cowboys with Kubernetes-themed jokes"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -18,15 +18,23 @@ dev = [
     "python-semantic-release>=9.0.0",
 ]
 
+[build-system]
+requires = ["setuptools>=61", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "cowboysite/_version.py"
+
 [tool.semantic_release]
-version_toml = [
-    "pyproject.toml:project.version",
-]
+# Don't update version files to avoid extra commits
+# version_toml = [
+#     "pyproject.toml:project.version",
+# ]
 build_command = """
     python -m pip install -e '.[build]'
     uv lock --upgrade-package cowboy-django
-    git add uv.lock
 """
+commit = false  # Don't create version bump commits
 major_on_zero = false
 tag_format = "v{version}"
 
