@@ -50,7 +50,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx semantic-release --config ${{ steps.cfg.outputs.file }} $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
+          npx semantic-release \
+            --config "./${{ steps.cfg.outputs.file }}" \
+            --repository-url "https://github.com/${{ github.repository }}" \
+            $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
 
       - name: Get current tag (last release)
         id: tag
