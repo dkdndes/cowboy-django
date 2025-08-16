@@ -8,11 +8,13 @@ on:
     branches: [develop, main]
 
 permissions:
+  contents: write
   packages: write
-  contents: read
+  security-events: write
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
   DOCKER_BUILDKIT: "1"
 
 jobs:
@@ -42,12 +44,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker login to GHCR
+      - name: Log in to Container Registry
         if: steps.get_release_info.outputs.released == 'true'
-        run: |
-          echo "Logging in as: ${{ github.actor }}"
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          echo "Login successful"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image with labels
         if: steps.get_release_info.outputs.released == 'true'
@@ -62,8 +65,8 @@ jobs:
             --label org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
             --label org.opencontainers.image.title="Cowboy Django" \
             --label org.opencontainers.image.description="Django + HTMX web app with ASCII art cowboys and Kubernetes jokes" \
-            -t ${{ env.IMAGE_NAME }}:$TAG \
-            -t ${{ env.IMAGE_NAME }}:$VERSION \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION \
             .
 
       - name: Tag Docker channel aliases
@@ -74,10 +77,10 @@ jobs:
           BRANCH="${{ github.event.workflow_run.head_branch }}"
           
           if [ "$BRANCH" = "main" ]; then
-            docker tag ${{ env.IMAGE_NAME }}:$TAG ${{ env.IMAGE_NAME }}:latest
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             echo "Tagged as latest for main branch"
           elif [ "$BRANCH" = "develop" ]; then
-            docker tag ${{ env.IMAGE_NAME }}:$TAG ${{ env.IMAGE_NAME }}:develop
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
             echo "Tagged as develop for develop branch"
           fi
 
@@ -89,15 +92,15 @@ jobs:
           BRANCH="${{ github.event.workflow_run.head_branch }}"
           
           # Push version tag
-          docker push ${{ env.IMAGE_NAME }}:$TAG
-          docker push ${{ env.IMAGE_NAME }}:$VERSION
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION
           
           # Push branch alias
           if [ "$BRANCH" = "main" ]; then
-            docker push ${{ env.IMAGE_NAME }}:latest
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             echo "Pushed latest tag"
           elif [ "$BRANCH" = "develop" ]; then
-            docker push ${{ env.IMAGE_NAME }}:develop
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
             echo "Pushed develop tag"
           fi
 
@@ -109,14 +112,14 @@ jobs:
           echo "- **Tag**: ${{ steps.get_release_info.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Images pushed**:" >> $GITHUB_STEP_SUMMARY
-          echo "  - \`${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "  - \`${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_release_info.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           
           BRANCH="${{ github.event.workflow_run.head_branch }}"
           if [ "$BRANCH" = "main" ]; then
-            echo "  - \`${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
           elif [ "$BRANCH" = "develop" ]; then
-            echo "  - \`${{ env.IMAGE_NAME }}:develop\`" >> $GITHUB_STEP_SUMMARY
+            echo "  - \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop\`" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: No release summary
