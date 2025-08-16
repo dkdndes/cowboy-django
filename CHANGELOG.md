@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v2.0.1-a.1 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Ensure Docker builds for main branch even without new releases
+  ([`7ce789f`](https://github.com/dkdndes/cowboy-django/commit/7ce789f168d8870ef7e967cf73165f26de2e3e8a))
+
+- Always build Docker images when main branch workflows complete - This ensures 'latest' tag is
+  available for stable releases - Maintain existing logic for develop branch pre-releases
+
+- **release**: Configure proper Django-style versioning
+  ([`eeb69c9`](https://github.com/dkdndes/cowboy-django/commit/eeb69c93dea5cbb9e1d629e9322cf4ba5c44e141))
+
+- Set develop branch to create pre-releases with 'a' token (v1.2.0a1) - Keep main branch for stable
+  releases (v1.2.0) - Follow Django's official release process conventions
+
+
 ## v2.0.0 (2025-08-16)
 
 ### Bug Fixes
