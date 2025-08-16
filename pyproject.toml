@@ -1,5 +1,5 @@
 [project]
-name = "django-cowboy-htmx-rotator"
+name = "cowboy-django"
 version = "2.0.3"
 description = "A Django + HTMX web app that serves ASCII art cowboys with Kubernetes-themed jokes"
 readme = "README.md"
@@ -24,7 +24,7 @@ version_toml = [
 ]
 build_command = """
     python -m pip install -e '.[build]'
-    uv lock --upgrade-package django-cowboy-htmx-rotator
+    uv lock --upgrade-package cowboy-django
     git add uv.lock
 """
 major_on_zero = false
