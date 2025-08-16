@@ -13,6 +13,8 @@ env:
   DOCKER_BUILDKIT: "1"
   # Default to dry-run in local 'act' runs; set repo variable DRY_RUN=false to actually publish when testing locally.
   DRY_RUN: ${{ vars.DRY_RUN || 'true' }}
+  # Hard-block npm auth so @semantic-release/npm can't accidentally kick in
+  NPM_CONFIG_USERCONFIG: /dev/null
 
 jobs:
   build-release-publish:
@@ -29,7 +31,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install semantic-release and plugins
+      - name: Install semantic-release and plugins (no npm plugin)
         run: |
           npm i -D semantic-release @semantic-release/changelog \
                  @semantic-release/commit-analyzer @semantic-release/release-notes-generator \
@@ -44,6 +46,17 @@ jobs:
           else
             echo "file=.releaserc.develop.json" >> $GITHUB_OUTPUT
           fi
+
+      - name: Show & validate selected config
+        run: |
+          echo "PWD=$(pwd)"
+          echo "Using config: ${{ steps.cfg.outputs.file }}"
+          test -f "${{ steps.cfg.outputs.file }}" || { echo "Config not found"; exit 1; }
+          command -v jq >/dev/null || sudo apt-get update && sudo apt-get install -y jq
+          jq . "${{ steps.cfg.outputs.file }}" >/dev/null || { echo "Config JSON invalid"; exit 1; }
+          echo "----- BEGIN CONFIG -----"
+          cat "${{ steps.cfg.outputs.file }}"
+          echo "------ END CONFIG ------"
 
       - name: Run semantic-release
         id: semrel

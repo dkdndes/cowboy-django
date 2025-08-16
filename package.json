@@ -1,5 +1,6 @@
 {
   "name": "cowboy-django",
+  "private": true,
   "version": "1.0.0",
   "description": "A Django + HTMX web app that serves ASCII art cowboys with Kubernetes-themed jokes. Perfect for DevOps engineers who need a laugh between deployments!",
   "main": "index.js",
