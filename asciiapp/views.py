@@ -4,10 +4,12 @@ from .cowboy import render_art, ASCII_ARTS
 
 JOKES = [
     "Pod went missing—turned out to be a Job all along.",
-    "Our cowboy lassoed nodes; now it’s a proper cluster.",
+    "Our cowboy lassoed nodes; now it's a proper cluster.",
     "This Service had no selectors, but plenty of ambition.",
     "Yeehaw! Autoscaler grew faster than our Helm chart broke.",
     "ConfigMaps: because even cowboys need plain text wisdom.",
+    "This cowboy's Ingress was denied—guess the Load Balancer wasn't feeling social!",
+    "Kubernetes volumes mounted faster than my horse at sunrise.",
 ]
 
 
