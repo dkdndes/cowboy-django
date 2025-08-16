@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v1.2.2 (2025-08-16)
+
+### Bug Fixes
+
+- **ignore**: Resolve .gitignore conflict and exclude CLAUDE.md from tracking
+  ([`4332da8`](https://github.com/dkdndes/cowboy-django/commit/4332da86cd24d5a348ca598832df237b13b063f5))
+
+- Resolve merge conflict in .gitignore - Add CLAUDE.md to .gitignore to keep it local only - Add
+  explicit CLAUDE.md entry to .dockerignore for clarity - Remove conflicting nodejs entries leftover
+  from migration
+
+
 ## v1.2.1 (2025-08-16)
 
 ### Bug Fixes
