@@ -49,20 +49,23 @@ kubectl port-forward svc/cowboy-django -n cowboy 8000:80
 ```
 
 ### Release & Versioning
-This project uses semantic-release with Conventional Commits:
+This project uses python-semantic-release with Conventional Commits:
 - `feat(scope): description` → minor version bump
 - `fix(scope): description` → patch version bump  
 - `BREAKING CHANGE:` in commit body → major version bump
 
+Configuration is in `pyproject.toml` under `[tool.semantic_release]`.
+
 ```bash
-# Test release workflow locally with act
-act push \
-    -W .github/workflows/release-act-test.yml \
-    -j build-release-dry-run \
-    -P ubuntu-latest=catthehacker/ubuntu:act-latest \
-    --container-architecture linux/amd64 \
-    --pull=false \
-    -e <(printf '{"ref":"refs/heads/feature/test-ci"}')
+# Test semantic release locally (dry-run)
+uv run semantic-release version --dry-run
+
+# Check what version would be released
+uv run semantic-release version --print
+
+# Manual release (for testing)
+uv run semantic-release version
+uv run semantic-release publish
 ```
 
 ## Code and Commit Guidelines
