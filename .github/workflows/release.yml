@@ -64,7 +64,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release \
-            --config "${{ steps.cfg.outputs.file }}" \
+            --config "./${{ steps.cfg.outputs.file }}" \
             --repository-url "https://github.com/${{ github.repository }}" \
             $([ "${{ env.DRY_RUN }}" = "true" ] && echo "--dry-run" )
 
