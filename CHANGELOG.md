@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v1.1.2 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Improve Docker image naming and remove unused workflow
+  ([`68fd4af`](https://github.com/dkdndes/cowboy-django/commit/68fd4af87b03e2dd29963a9d6dc90b6a7ca51aba))
+
+- Use github.repository_owner for better GHCR compatibility - Remove release-act-test.yml workflow
+  (no longer needed) - This should help resolve Docker push permission issues
+
+
 ## v1.1.1 (2025-08-16)
 
 ### Bug Fixes
