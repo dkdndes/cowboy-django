@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v1.2.1 (2025-08-16)
+
+### Bug Fixes
+
+- **ci**: Adopt working Docker login pattern from pybiorythm
+  ([`1ee612b`](https://github.com/dkdndes/cowboy-django/commit/1ee612b9f43a2d82286e133906eeffe8247eaaa9))
+
+- Use docker/login-action@v3 instead of manual docker login - Add security-events: write permission
+  - Use standard github.repository instead of custom naming - Match proven working configuration
+  from pybiorythm repository
+
+This should resolve the 'permission_denied: write_package' error.
+
+
 ## v1.2.0 (2025-08-16)
 
 ### Features
