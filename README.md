@@ -2,9 +2,33 @@
 
 A Django + HTMX web app that serves ASCII art cowboys with Kubernetes-themed jokes. Perfect for DevOps engineers who need a laugh between deployments!
 
+## 📋 Project Status
+
+![GitHub release](https://img.shields.io/github/v/release/dkdndes/cowboy-django)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dkdndes/cowboy-django/python-release.yml?branch=main&label=release%20workflow)
+![Docker Image Size](https://img.shields.io/docker/image-size/ghcr.io/dkdndes/cowboy-django/latest?label=docker%20image)
+![GitHub License](https://img.shields.io/github/license/dkdndes/cowboy-django)
+
+## 🛠️ Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.0+-green?logo=django&logoColor=white)
+![HTMX](https://img.shields.io/badge/HTMX-Interactive-blue?logo=htmx&logoColor=white)
+![uv](https://img.shields.io/badge/uv-Package%20Manager-orange?logo=python&logoColor=white)
+
+## 🔧 Code Quality & DevOps
+
+![Ruff](https://img.shields.io/badge/Ruff-Linting-red?logo=ruff&logoColor=white)
+![Semantic Release](https://img.shields.io/badge/Semantic%20Release-Automated-blue?logo=semantic-release&logoColor=white)
+![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow?logo=conventionalcommits&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-blue?logo=kubernetes&logoColor=white)
+
+## 🚀 Quick Links
+
 **Repository**: [cowboy-django](https://github.com/dkdndes/cowboy-django)  
 **Docker Images**: [ghcr.io/dkdndes/cowboy-django](https://github.com/users/dkdndes/packages/container/package/cowboy-django)  
-**Latest Release**: ![GitHub release](https://img.shields.io/github/v/release/dkdndes/cowboy-django)
+**Releases**: [GitHub Releases](https://github.com/dkdndes/cowboy-django/releases)
 
 # What It Is
 
@@ -35,7 +59,7 @@ docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:develop
 
 ### Run specific version
 ```bash
-docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:v2.0.1
+docker run -p 8000:8000 ghcr.io/dkdndes/cowboy-django:v2.1.1
 ```
 
 Visit: http://localhost:8000
@@ -85,15 +109,16 @@ Visit: http://localhost:8000
 This project uses automated workflows for releases and Docker image publishing:
 
 ## 🔄 Release Workflow
-- **Develop branch** → Creates pre-releases (e.g., `v2.0.1-a.1`) for testing
-- **Main branch** → Creates stable releases (e.g., `v2.0.1`) for production
+- **Develop branch** → Creates pre-releases (e.g., `v2.1.0-a.3`) for testing
+- **Main branch** → Creates stable releases (e.g., `v2.1.1`) for production
 - **Conventional commits** drive version bumps automatically
+- **Git tag-based versioning** with no version files to maintain
 
 ## 🐳 Docker Images
 - **Latest stable**: `ghcr.io/dkdndes/cowboy-django:latest`
 - **Development**: `ghcr.io/dkdndes/cowboy-django:develop`  
-- **Specific versions**: `ghcr.io/dkdndes/cowboy-django:v2.0.1`
-- **Pre-releases**: `ghcr.io/dkdndes/cowboy-django:v2.0.1-a.1`
+- **Specific versions**: `ghcr.io/dkdndes/cowboy-django:v2.1.1`
+- **Pre-releases**: `ghcr.io/dkdndes/cowboy-django:v2.1.0-a.3`
 
 ## 📚 Workflow Documentation
 For using these workflows in your own Django projects:
@@ -188,12 +213,27 @@ cowboy-django/
 
 # Technology Stack
 
-- Backend: Django 5.0+ with ASGI/Uvicorn
-- Frontend: HTMX + Vanilla CSS
--	Dependencies: Managed with uv
-- Containerization: Docker
--	Orchestration: Kubernetes
--	Data: JSON-based ASCII art storage
+## Core Framework
+- **Backend**: Django 5.0+ with ASGI/Uvicorn server
+- **Frontend**: HTMX for dynamic interactions + Vanilla CSS
+- **Python**: 3.12+ with modern tooling
+
+## Development & Build Tools
+- **Package Management**: uv (fast Python package installer)
+- **Code Quality**: Ruff (linting and formatting)
+- **Version Control**: Git with conventional commits
+- **CI/CD**: GitHub Actions with semantic-release
+
+## Deployment & Infrastructure
+- **Containerization**: Docker with multi-stage builds
+- **Registry**: GitHub Container Registry (GHCR)
+- **Orchestration**: Kubernetes-ready manifests
+- **Versioning**: Git tag-based with setuptools-scm
+
+## Data & Storage
+- **ASCII Art**: JSON-based storage (no database required)
+- **Session Management**: Django sessions for joke rotation
+- **Static Files**: Served via Django's staticfiles
 
 
 # Technical Highlights
