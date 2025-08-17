@@ -19,23 +19,11 @@
 This eliminates the circular reference issue and prevents extra commits on main branch after
   releases, keeping develop and main branches synchronized.
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-
 * fix(ci): use stable semantic-release version and Git tag versioning
 
 - Downgrade to python-semantic-release@v9.14.0 for stability - Fix version detection to use Git tags
   instead of pyproject.toml - This aligns with our setuptools_scm Git tag-based approach - Should
   resolve Docker container build issues in the Action
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-
----------
-
-Co-authored-by: Claude <noreply@anthropic.com>
 
 
 ## v2.1.0-a.1 (2025-08-17)
@@ -61,10 +49,6 @@ Co-authored-by: Claude <noreply@anthropic.com>
 
 This eliminates the circular reference issue and prevents extra commits on main branch after
   releases, keeping develop and main branches synchronized.
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-authored-by: Claude <noreply@anthropic.com>
 
 - **jokes**: Add two new Kubernetes-themed cowboy jokes
   ([`7e2cfca`](https://github.com/dkdndes/cowboy-django/commit/7e2cfcaba810209001b1b9bf06d7c2a9773f6ae4))
