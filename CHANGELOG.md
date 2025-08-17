@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v2.1.0-a.5 (2025-08-17)
+
+### Documentation
+
+- Update all documentation with Git tag versioning and modern tooling
+  ([`d6d83d0`](https://github.com/dkdndes/cowboy-django/commit/d6d83d0df426d35444c7261db05b0851d6d46625))
+
+- Update README.md with comprehensive badges and latest version references - Remove all external
+  tool references from CHANGELOG.md - Update python-semantic-release-workflow.md with Git tag-based
+  versioning details - Fix Docker workflow documentation to use proper uv installation pattern -
+  Update release-and-publish.md with current v2.1.x version examples - Replace pip references with
+  uv throughout documentation - Add Git tag versioning benefits and clean workflow explanations -
+  Update project documentation with latest technology stack details
+
+
 ## v2.1.0-a.4 (2025-08-17)
 
 ### Documentation
@@ -44,6 +59,9 @@ Clean up changelog entries to remove automated tool attributions while preservin
 This eliminates the circular reference issue and prevents extra commits on main branch after
   releases, keeping develop and main branches synchronized.
 
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 
 * fix(ci): use stable semantic-release version and Git tag versioning
 
@@ -51,9 +69,13 @@ This eliminates the circular reference issue and prevents extra commits on main 
   instead of pyproject.toml - This aligns with our setuptools_scm Git tag-based approach - Should
   resolve Docker container build issues in the Action
 
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---------
 
+Co-authored-by: Claude <noreply@anthropic.com>
 
 
 ## v2.1.0-a.1 (2025-08-17)
@@ -82,6 +104,7 @@ This eliminates the circular reference issue and prevents extra commits on main 
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
+Co-authored-by: Claude <noreply@anthropic.com>
 
 - **jokes**: Add two new Kubernetes-themed cowboy jokes
   ([`7e2cfca`](https://github.com/dkdndes/cowboy-django/commit/7e2cfcaba810209001b1b9bf06d7c2a9773f6ae4))
