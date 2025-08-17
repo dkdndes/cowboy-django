@@ -130,11 +130,8 @@ cd cowboy-django
 
 2. **Install Dependencies**:
 ```bash
-# Using uv (recommended)
+# Install with uv (fast and reliable)
 uv sync
-
-# Or using pip
-pip install -e .
 ```
 
 3. **Database Setup**:

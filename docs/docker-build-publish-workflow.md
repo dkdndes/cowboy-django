@@ -118,7 +118,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements and install Python dependencies
 COPY pyproject.toml uv.lock ./
-RUN pip install uv && uv sync --frozen
+RUN pip install uv
+RUN uv sync --frozen
 
 # Copy application code
 COPY . .
@@ -370,7 +371,8 @@ Optimize for Django applications:
 FROM python:3.12-slim as builder
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN pip install uv && uv sync --frozen
+RUN pip install uv
+RUN uv sync --frozen
 
 # Runtime stage  
 FROM python:3.12-slim

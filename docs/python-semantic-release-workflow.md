@@ -22,19 +22,26 @@ The Python Semantic Release workflow (`python-release.yml`) provides automated v
 
 ### For Develop Branch
 1. **Analyzes commits** since last release using conventional commit format
-2. **Creates pre-release versions** with Django-style alpha suffix (e.g., `v2.0.1-a.1`)
-3. **Updates CHANGELOG.md** with new changes
-4. **Commits version bump** back to the branch
+2. **Creates pre-release versions** with Django-style alpha suffix (e.g., `v2.1.0-a.3`)
+3. **Creates Git tag** for the version (no file commits)
+4. **Updates CHANGELOG.md** with new changes
 5. **Creates GitHub pre-release** (marked as pre-release)
 6. **Outputs version info** for downstream workflows (Docker build)
 
 ### For Main Branch
 1. **Analyzes commits** since last release
-2. **Creates stable release versions** (e.g., `v2.0.1`)
-3. **Updates CHANGELOG.md** with finalized changes
-4. **Commits version bump** back to the branch
+2. **Creates stable release versions** (e.g., `v2.1.1`)
+3. **Creates Git tag** for the version (no file commits)
+4. **Updates CHANGELOG.md** with finalized changes
 5. **Creates GitHub release** (stable, not pre-release)
 6. **Outputs version info** for downstream workflows
+
+### Git Tag-Based Versioning
+This workflow uses **Git tags only** for version management:
+- ✅ **No version files** to maintain in the codebase
+- ✅ **No version bump commits** that create merge conflicts
+- ✅ **Pure Git tag discovery** via setuptools_scm
+- ✅ **Clean branch synchronization** between develop and main
 
 ## Configuration
 
@@ -153,7 +160,8 @@ your-django-project/
 1. **Python-native tooling** - Uses Python semantic-release instead of Node.js
 2. **uv integration** - Automatically updates `uv.lock` with new versions
 3. **Django versioning** - Follows Django's alpha/beta/rc conventions
-4. **Project metadata** - Updates `pyproject.toml` version automatically
+4. **Git tag-based versioning** - No version files, pure Git tag discovery
+5. **Clean workflows** - No version bump commits prevent merge conflicts
 
 ## Usage Examples
 
@@ -165,15 +173,30 @@ mkdir -p .github/workflows
 cp python-release.yml .github/workflows/
 ```
 
-2. **Add configuration to `pyproject.toml`:**
+2. **Configure dynamic versioning in `pyproject.toml`:**
 ```toml
+[project]
+name = "your-project-name"
+dynamic = ["version"]  # Use Git tags for version discovery
+description = "Your project description"
+# ... other project metadata
+
+[build-system]
+requires = ["setuptools>=61", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["your_main_package", "your_django_apps"]
+
+[tool.setuptools_scm]
+# Git tag-based version discovery (no files written)
+
 [tool.semantic_release]
-version_variables = ["pyproject.toml:project.version"]
 build_command = """
-    python -m pip install -e '.[build]'
+    uv sync --dev
     uv lock --upgrade-package your-project-name
-    git add uv.lock
 """
+commit = false  # No version bump commits
 major_on_zero = false
 tag_format = "v{version}"
 

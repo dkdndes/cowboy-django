@@ -29,24 +29,27 @@ The project has been migrated from Node.js semantic-release to Python semantic-r
 
 ### ✅ **What Improved**
 - **No More Parser Errors**: Eliminated persistent Node.js semantic-release parsing issues
-- **Django-Style Versioning**: Pre-releases use Django conventions (e.g., `v2.0.1-a.1`)
+- **Django-Style Versioning**: Pre-releases use Django conventions (e.g., `v2.1.0-a.3`)
 - **Better Python Integration**: Native Python tooling for Python projects
 - **Separated Concerns**: Independent semantic release and Docker workflows
+- **Git Tag-Based Versioning**: No version files, pure Git tag discovery via setuptools_scm
+- **Clean Branch Management**: No version bump commits prevent merge conflicts
 - **Improved Reliability**: More stable and maintainable automation
 
 ### ✅ **Current Release Flow**
-1. **Develop Branch** → Creates pre-releases (e.g., `v2.0.1-a.1`)
-2. **Main Branch** → Creates stable releases (e.g., `v2.0.1`)
+1. **Develop Branch** → Creates pre-releases (e.g., `v2.1.0-a.3`) using Git tags only
+2. **Main Branch** → Creates stable releases (e.g., `v2.1.1`) using Git tags only
 3. **Docker Images** → Automatically built and published for both branches
 4. **GitHub Releases** → Automated release notes and changelogs
+5. **No File Commits** → Version managed purely through Git tags
 
 ## Quick Reference
 
 ### Available Docker Images
 - **Latest stable**: `ghcr.io/dkdndes/cowboy-django:latest`
 - **Development**: `ghcr.io/dkdndes/cowboy-django:develop`
-- **Specific versions**: `ghcr.io/dkdndes/cowboy-django:v2.0.1`
-- **Pre-releases**: `ghcr.io/dkdndes/cowboy-django:v2.0.1-a.1`
+- **Specific versions**: `ghcr.io/dkdndes/cowboy-django:v2.1.1`
+- **Pre-releases**: `ghcr.io/dkdndes/cowboy-django:v2.1.0-a.3`
 
 ### Conventional Commit Examples
 ```bash
