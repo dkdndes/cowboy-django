@@ -22,19 +22,17 @@ dev = [
 requires = ["setuptools>=61", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["cowboysite", "asciiapp"]
+
 [tool.setuptools_scm]
-write_to = "cowboysite/_version.py"
 
 [tool.semantic_release]
-# Don't update version files to avoid extra commits
-# version_toml = [
-#     "pyproject.toml:project.version",
-# ]
 build_command = """
     python -m pip install -e '.[build]'
     uv lock --upgrade-package cowboy-django
 """
-commit = false  # Don't create version bump commits
+commit = false
 major_on_zero = false
 tag_format = "v{version}"
 
