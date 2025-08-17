@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v2.1.0-a.4 (2025-08-17)
+
+### Documentation
+
+- Update README with comprehensive badges and tech stack
+  ([`4dc9105`](https://github.com/dkdndes/cowboy-django/commit/4dc910598da1ba3e6bf9090153a49f5e80a7ff5b))
+
+- Add comprehensive badge sections for project status, tech stack, and DevOps tools - Include badges
+  for Python, Django, HTMX, uv, Ruff, Semantic Release, Docker, and Kubernetes - Update version
+  references to latest v2.1.1 release - Enhance technology stack section with detailed tool
+  descriptions - Add GitHub Actions workflow status and Docker image size badges - Improve project
+  navigation with organized badge sections
+
+
 ## v2.1.0-a.3 (2025-08-17)
 
 ### Documentation
